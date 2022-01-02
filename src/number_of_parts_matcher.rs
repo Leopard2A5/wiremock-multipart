@@ -2,9 +2,9 @@ use wiremock::{Match, Request};
 
 use crate::header_utils::RequestUtils;
 
-pub struct NumberOfPartsMatcher(usize);
+pub struct NumberOfParts(usize);
 
-impl Match for NumberOfPartsMatcher {
+impl Match for NumberOfParts {
     fn matches(&self, request: &Request) -> bool {
         request.parts().len() == self.0
     }
@@ -34,8 +34,8 @@ mod tests {
             "}.as_bytes().into(),
         );
 
-        assert_eq!(NumberOfPartsMatcher(0).matches(&request), false);
-        assert_eq!(NumberOfPartsMatcher(1).matches(&request), true);
-        assert_eq!(NumberOfPartsMatcher(2).matches(&request), false);
+        assert_eq!(NumberOfParts(0).matches(&request), false);
+        assert_eq!(NumberOfParts(1).matches(&request), true);
+        assert_eq!(NumberOfParts(2).matches(&request), false);
     }
 }
