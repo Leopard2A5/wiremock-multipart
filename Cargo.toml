@@ -1,0 +1,14 @@
+[package]
+name = "wiremock-multipart"
+version = "0.1.0"
+authors = ["René Perschon <rene.perschon@akelius.de>"]
+description = "library of matchers for [wiremock](https://crates.io/crates/wiremock) dealing with multipart requests."
+homepage = "https://github.com/Leopard2A5/wiremock-multipart"
+repository = "https://github.com/Leopard2A5/wiremock-multipart"
+documentation = "https://docs.rs/wiremock-multipart"
+license = "MIT"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
