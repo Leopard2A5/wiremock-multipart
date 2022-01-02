@@ -1,3 +1,39 @@
+//! wiremock-multipart adds matchers for use with [wiremock](https://crates.io/crates/wiremock)
+//! to check multipart characteristics of requests.
+//!
+//! ## How to install
+//! Add `wiremock-multipart` to your dev-dependencies:
+//! ```toml
+//! [dev-dependencies]
+//! # ...
+//! wiremock-multipart = "0.1"
+//! ```
+//!
+//! ## Getting started
+//!
+//! ```rust
+//! use wiremock::{MockServer, Mock, ResponseTemplate};
+//! use wiremock::matchers::method;
+//! use wiremock_multipart::prelude::*;
+//!
+//! #[async_std::main]
+//! async fn main() {
+//!     // Start a background HTTP server on a random local port
+//!     let mock_server = MockServer::start().await;
+//!
+//!     // Arrange the behaviour of the MockServer adding a Mock
+//!     Mock::given(method("POST"))
+//!         .and(NumberOfParts(2))
+//!         .respond_with(ResponseTemplate::new(200))
+//!         // Mounting the mock on the mock server - it's now effective!
+//!         .mount(&mock_server)
+//!         .await;
+//!
+//!     // if we now send a multipart/form-data request with two parts to it, the request
+//!     // will match and return 200.
+//! }
+//! ```
+
 #[cfg(test)] extern crate indoc;
 #[cfg(test)] extern crate maplit;
 extern crate wiremock;
