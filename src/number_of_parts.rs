@@ -3,7 +3,7 @@ use wiremock::{Match, Request};
 use crate::header_utils::RequestUtils;
 
 /// Match a multipart/form-data request with this many individual parts.
-pub struct NumberOfParts(usize);
+pub struct NumberOfParts(pub usize);
 
 impl Match for NumberOfParts {
     fn matches(&self, request: &Request) -> bool {

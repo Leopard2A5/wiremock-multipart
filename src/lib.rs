@@ -2,9 +2,13 @@
 #[cfg(test)] extern crate maplit;
 extern crate wiremock;
 
-mod number_of_parts_matcher;
+pub mod number_of_parts;
 mod header_utils;
 mod part;
+
+pub mod prelude {
+    pub use crate::number_of_parts::NumberOfParts;
+}
 
 #[cfg(test)]
 mod test_utils {
