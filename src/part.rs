@@ -11,7 +11,7 @@ impl<'a> Part<'a> {
         match header {
             None => None,
             Some(header) => {
-                let regex = regex!(r#"name="([^"].*)""#i);
+                let regex = regex!(r#";\s*name="([^"].*?)""#i);
                 regex.captures(header)
                     .and_then(|cap| cap.get(1))
                     .map(|mtch| mtch.as_str())
@@ -24,7 +24,7 @@ impl<'a> Part<'a> {
         match header {
             None => None,
             Some(header) => {
-                let regex = regex!(r#"filename="([^"].*)""#i);
+                let regex = regex!(r#";\s*filename="([^"].*?)""#i);
                 regex.captures(header)
                     .and_then(|cap| cap.get(1))
                     .map(|mtch| mtch.as_str())
@@ -130,7 +130,7 @@ mod tests {
     #[test]
     fn should_extract_part_name() {
         assert_eq!(
-            Part::from("Content-Disposition: form-data; name=\"text\"\nContent-Type: plain/text\n\ncontent").name(),
+            Part::from("Content-Disposition: form-data; name=\"text\"; filename=\"filename\"\nContent-Type: plain/text\n\ncontent").name(),
             Some("text"),
         );
     }
@@ -138,7 +138,7 @@ mod tests {
     #[test]
     fn should_extract_file_name() {
         assert_eq!(
-            Part::from("Content-Disposition: form-data; name=\"text\"\n; filename=\"my-file.txt\"\nContent-Type: plain/text\n\ncontent").filename(),
+            Part::from("Content-Disposition: form-data; filename=\"my-file.txt\"; name=\"text\"\n\nContent-Type: plain/text\n\ncontent").filename(),
             Some("my-file.txt"),
         );
     }

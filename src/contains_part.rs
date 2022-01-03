@@ -46,7 +46,7 @@ impl<'a, 'b, 'c, 'd> Match for ContainsPart<'a, 'b, 'c, 'd> {
     fn matches(&self, request: &Request) -> bool {
         request.parts().iter()
             .any(|part| {
-                let name = dbg!(self.name.as_ref())
+                let name = self.name.as_ref()
                     .map(|required_name| {
                         part.name()
                             .map(|part_name| required_name == part_name)
@@ -192,7 +192,7 @@ mod tests {
                     multipart_header(),
                     indoc!{r#"
                     --xyz
-                    Content-Disposition: form-data; name="not-the-part" filename="not-the-file"
+                    Content-Disposition: form-data; name="not-the-part"; filename="not-the-file"
 
                     content
                     --xyz--
@@ -208,7 +208,7 @@ mod tests {
                     multipart_header(),
                     indoc!{r#"
                     --xyz
-                    Content-Disposition: form-data; name="part-a" filename="file-a"
+                    Content-Disposition: form-data; name="part-a"; filename="file-a"
 
                     content
                     --xyz--
