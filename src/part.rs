@@ -48,7 +48,7 @@ impl<'a> Part<'a> {
     pub fn header(&self) -> Option<&'a str> {
         match self.header_body_boundary() {
             None => None,
-            Some(end_of_header_index) => {
+            Some((end_of_header_index, _)) => {
                 Some(std::str::from_utf8(&self.content[0..end_of_header_index]).unwrap())
             },
         }
@@ -57,22 +57,23 @@ impl<'a> Part<'a> {
     pub fn body(&self) -> Option<&'a [u8]> {
         match self.header_body_boundary() {
             None => None,
-            Some(end_of_header_index) => {
-                Some(&self.content[(end_of_header_index + 2)..])
+            Some((end_of_header_index, separator_len)) => {
+                Some(&self.content[(end_of_header_index + separator_len)..])
             },
         }
     }
 
-    fn header_body_boundary(&self) -> Option<usize> {
-        let mut end_of_header_index = None;
-        for index in 0..(self.content.len() - 1) {
-            if self.content[index] == '\n' as u8 && self.content[index + 1] == '\n' as u8 {
-                end_of_header_index = Some(index);
-                break;
-            }
-        }
-
-        end_of_header_index
+    fn header_body_boundary(&self) -> Option<(usize, usize)> {
+        self.content
+            .windows(4)
+            .enumerate()
+            .find_map(|(index, window)| {
+                match window {
+                    [b'\n', b'\n', _, _] => Some((index, 2)),
+                    [b'\r', b'\n', b'\r', b'\n'] => Some((index, 4)),
+                    _ => None,
+                }
+            })
     }
 }
 
@@ -95,6 +96,36 @@ impl<'a> From<&'a str> for Part<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn should_extract_header_and_body() {
+        let part = Part::from("Content-Disposition: form-data; name=\"text\"\nContent-Type: plain/text\n\ncontent");
+
+        assert_eq!(
+            part.header(),
+            Some("Content-Disposition: form-data; name=\"text\"\nContent-Type: plain/text"),
+        );
+
+        assert_eq!(
+            part.body(),
+            Some("content".as_bytes()),
+        );
+    }
+
+    #[test]
+    fn should_extract_header_and_body_with_cr_and_newline() {
+        let part = Part::from("Content-Disposition: form-data; name=\"text\"\r\nContent-Type: plain/text\r\n\r\ncontent");
+
+        assert_eq!(
+            part.header(),
+            Some("Content-Disposition: form-data; name=\"text\"\r\nContent-Type: plain/text"),
+        );
+
+        assert_eq!(
+            part.body(),
+            Some("content".as_bytes()),
+        );
+    }
 
     #[test]
     fn should_extract_part_name() {

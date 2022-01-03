@@ -46,7 +46,7 @@ impl<'a, 'b, 'c, 'd> Match for ContainsPart<'a, 'b, 'c, 'd> {
     fn matches(&self, request: &Request) -> bool {
         request.parts().iter()
             .any(|part| {
-                let name = self.name.as_ref()
+                let name = dbg!(self.name.as_ref())
                     .map(|required_name| {
                         part.name()
                             .map(|part_name| required_name == part_name)
