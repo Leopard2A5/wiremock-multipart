@@ -13,6 +13,7 @@ edition = "2021"
 
 [dependencies]
 wiremock = "0.5"
+lazy-regex = "2.2"
 
 [dev-dependencies]
 maplit = "1.0"

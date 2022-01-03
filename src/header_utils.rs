@@ -23,12 +23,11 @@ impl RequestUtils for Request {
                 match multipart_value {
                     None => None,
                     Some(value) => {
-                        let parts = dbg!(value.as_str().split(";").collect::<Vec<_>>());
+                        let parts = value.as_str().split(";").collect::<Vec<_>>();
 
                         let multipart_type = parts[0].split("/")
-                            .skip(1)
-                            .take(1)
-                            .collect::<Vec<_>>()[0]
+                            .nth(1)
+                            .unwrap()
                             .trim();
 
                         let boundary = parts.iter()
@@ -38,9 +37,8 @@ impl RequestUtils for Request {
                             })
                             .map(|whole| {
                                 whole.split("=")
-                                    .skip(1)
-                                    .take(1)
-                                    .collect::<Vec<_>>()[0]
+                                    .nth(1)
+                                    .unwrap()
                                     .trim()
                             });
 

@@ -37,19 +37,23 @@
 #[cfg(test)] extern crate indoc;
 #[cfg(test)] extern crate maplit;
 extern crate wiremock;
+extern crate lazy_regex;
 
-pub mod number_of_parts;
 mod header_utils;
 mod part;
+pub mod number_of_parts;
+pub mod contains_part;
 
 pub mod prelude {
     pub use crate::number_of_parts::NumberOfParts;
+    pub use crate::contains_part::ContainsPart;
 }
 
 #[cfg(test)]
 mod test_utils {
     use std::collections::HashMap;
     use std::str::FromStr;
+    use maplit::hashmap;
 
     use wiremock::http::{HeaderName, HeaderValue, HeaderValues, Method, Url};
     use wiremock::Request;
@@ -81,6 +85,12 @@ mod test_utils {
             method: Method::Post,
             headers,
             body,
+        }
+    }
+
+    pub fn multipart_header() -> HashMap<HeaderName, HeaderValues> {
+        hashmap!{
+            name("content-type") => values("multipart/form-data; boundary=xyz"),
         }
     }
 }
