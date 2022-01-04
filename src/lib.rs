@@ -39,7 +39,7 @@
 extern crate wiremock;
 extern crate lazy_regex;
 
-mod header_utils;
+mod request_utils;
 mod part;
 pub mod number_of_parts;
 pub mod contains_part;

@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use wiremock::{Match, Request};
-use crate::header_utils::RequestUtils;
+use crate::request_utils::RequestUtils;
 
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct ContainsPart<'a, 'b, 'c, 'd> {
