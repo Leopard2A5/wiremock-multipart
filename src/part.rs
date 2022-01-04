@@ -1,4 +1,4 @@
-use lazy_regex::{regex};
+use lazy_regex::regex;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Part<'a> {
@@ -87,6 +87,14 @@ impl<'a> From<&'a [u8]> for Part<'a> {
 
 impl<'a> From<&'a str> for Part<'a> {
     fn from(text: &'a str) -> Self {
+        Part {
+            content: text.as_bytes(),
+        }
+    }
+}
+
+impl<'a> From<&'a String> for Part<'a> {
+    fn from(text: &'a String) -> Self {
         Part {
             content: text.as_bytes(),
         }

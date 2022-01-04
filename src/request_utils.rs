@@ -79,6 +79,8 @@ impl RequestUtils for Request {
                         .map(|(start, end)| {
                             &self.body[start..end]
                         })
+                        .map(|body| trim_single_linebreak_from_start(body))
+                        .map(|body| trim_single_linebreak_from_end(body))
                         .map(|it| Part::from(it))
                         .collect::<Vec<_>>()
                 } else {
@@ -93,6 +95,40 @@ impl RequestUtils for Request {
     }
 }
 
+fn trim_single_linebreak_from_start(body: &[u8]) -> &[u8] {
+    if body.len() >= 2 {
+        match body[..2] {
+            [b'\r', b'\n'] => &body[2..],
+            [b'\n', _] => &body[1..],
+            _ => body,
+        }
+    } else if body.len() >= 1 {
+        match body[0] {
+            b'\n' => &body[1..],
+            _ => body,
+        }
+    } else {
+        body
+    }
+}
+
+fn trim_single_linebreak_from_end(body: &[u8]) -> &[u8] {
+    if body.len() >= 2 {
+        match body[(body.len() - 2)..(body.len())] {
+            [b'\r', b'\n'] => &body[..body.len() - 2],
+            [_, b'\n'] => &body[..body.len() - 1],
+            _ => body,
+        }
+    } else if body.len() >= 1 {
+        match body[(body.len() - 1)..(body.len())] {
+            [_, b'\n'] => &body[..body.len() - 1],
+            _ => body,
+        }
+    } else {
+        body
+    }
+}
+
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub struct MultipartContentType<'a> {
     pub multipart_type: &'a str,
@@ -104,7 +140,7 @@ mod tests {
     use indoc::indoc;
     use maplit::hashmap;
 
-    use crate::test_utils::{name, request, requestb, values};
+    use crate::test_utils::{multipart_header, name, request, requestb, values};
 
     use super::*;
 
@@ -176,14 +212,27 @@ mod tests {
                 },
                 indoc!{"
                     --xyz
-                    Content-Disposition: form-data; name=part1
+                    Content-Disposition: form-data; name=\"part1\"
 
                     content
                     --xyz--
                 "}.as_bytes().into(),
             ).parts(),
             vec![
-                Part::from("Content-Disposition: form-data; name=part1\n\ncontent\n"),
+                Part::from("Content-Disposition: form-data; name=\"part1\"\n\ncontent"),
+            ],
+        );
+    }
+
+    #[test]
+    fn parts_should_find_single_text_part_with_crnr() {
+        assert_eq!(
+            requestb(
+                multipart_header(),
+                "--xyz\r\nContent-Disposition: form-data; name=\"part1\"\r\n\r\ncontent\r\n--xyz--".as_bytes().into()
+            ).parts(),
+            vec![
+                Part::from("Content-Disposition: form-data; name=\"part1\"\r\n\r\ncontent"),
             ],
         );
     }
@@ -197,7 +246,7 @@ mod tests {
                 },
                 indoc!{r#"
                     --xyz
-                    Content-Disposition: form-data; name=part1
+                    Content-Disposition: form-data; name="part1"
 
                     content
                     --xyz
@@ -214,7 +263,7 @@ mod tests {
                 "#}.as_bytes().into(),
             ).parts(),
             vec![
-                Part::from("Content-Disposition: form-data; name=part1\n\ncontent\n"),
+                Part::from("Content-Disposition: form-data; name=\"part1\"\n\ncontent"),
                 Part::from(indoc!{r#"
                     Content-Disposition: form-data; name="file"; filename="Cargo.toml"
                     Content-Type: plain/text
@@ -224,8 +273,38 @@ mod tests {
                         "fhttp",
                         "fhttp-core",
                     ]
-
                 "#}),
+            ],
+        );
+    }
+
+    #[test]
+    fn parts_should_find_two_text_parts_with_crnl() {
+        let part2 = {
+            let mut tmp = String::new();
+            tmp += "Content-Disposition: form-data; name=\"file\"; filename=\"Cargo.toml\"";
+            tmp += "\r\nContent-Type: plain/text";
+            tmp += "\r\n\r\n";
+            tmp += "[workspace]\nmembers = [\n    \"fhttp\",\n    \"fhttp-core\",\n]\n";
+
+            tmp
+        };
+        let mut body = String::new();
+        body += "--xyz";
+        body += "\r\nContent-Disposition: form-data; name=\"part1\"";
+        body += "\r\n\r\ncontent";
+        body += "\r\n--xyz\r\n";
+        body += &part2;
+        body += "\r\n--xyz--\r\n";
+
+        assert_eq!(
+            requestb(
+                multipart_header(),
+                body.as_bytes().into(),
+            ).parts(),
+            vec![
+                Part::from("Content-Disposition: form-data; name=\"part1\"\r\n\r\ncontent"),
+                Part::from(&part2),
             ],
         );
     }

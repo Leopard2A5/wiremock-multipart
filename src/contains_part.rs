@@ -1,5 +1,7 @@
 use std::borrow::Cow;
+
 use wiremock::{Match, Request};
+
 use crate::request_utils::RequestUtils;
 
 #[derive(Default, Debug, PartialEq, Eq)]
@@ -86,7 +88,9 @@ impl<'a, 'b, 'c, 'd> Match for ContainsPart<'a, 'b, 'c, 'd> {
 #[cfg(test)]
 mod tests {
     use indoc::indoc;
+
     use crate::test_utils::{multipart_header, requestb};
+
     use super::*;
 
     #[test]
@@ -259,7 +263,7 @@ mod tests {
     #[test]
     fn should_match_on_body() {
         assert_eq!(
-            ContainsPart::new().with_body("content\n".as_bytes()).matches(
+            ContainsPart::new().with_body("content".as_bytes()).matches(
                 &requestb(
                     multipart_header(),
                     indoc!{r#"
@@ -276,7 +280,7 @@ mod tests {
         );
 
         assert_eq!(
-            ContainsPart::new().with_body("content\n".as_bytes()).matches(
+            ContainsPart::new().with_body("content".as_bytes()).matches(
                 &requestb(
                     multipart_header(),
                     indoc!{r#"
