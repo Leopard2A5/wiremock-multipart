@@ -41,12 +41,10 @@ extern crate lazy_regex;
 
 mod request_utils;
 mod part;
-pub mod number_of_parts;
-pub mod contains_part;
+pub mod matchers;
 
 pub mod prelude {
-    pub use crate::number_of_parts::NumberOfParts;
-    pub use crate::contains_part::ContainsPart;
+    pub use crate::matchers::*;
 }
 
 #[cfg(test)]
