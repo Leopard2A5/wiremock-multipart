@@ -4,6 +4,30 @@ use wiremock::{Match, Request};
 
 use crate::request_utils::RequestUtils;
 
+/// Matcher builder to assert the presence of a matching part in the request.
+///
+/// ## Example
+///
+/// ```rust
+/// use wiremock::{MockServer, Mock, ResponseTemplate};
+/// use wiremock::matchers::method;
+/// use wiremock_multipart::prelude::*;
+///
+/// #[async_std::main]
+/// async fn main() {
+///     // Start a background HTTP server on a random local port
+///     let mock_server = MockServer::start().await;
+///
+///     Mock::given(method("POST"))
+///         .and(ContainsPart::new()
+///             .with_name("data-part")
+///             .with_content_type("text/plain")
+///             .with_body("simple text".as_bytes()))
+///         .respond_with(ResponseTemplate::new(200))
+///         .mount(&mock_server)
+///         .await;
+/// }
+/// ```
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct ContainsPart<'a, 'b, 'c, 'd> {
     pub name: Option<Cow<'a, str>>,
