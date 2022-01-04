@@ -88,8 +88,9 @@ impl<'a, 'b, 'c, 'd> Match for ContainsPart<'a, 'b, 'c, 'd> {
 #[cfg(test)]
 mod tests {
     use indoc::indoc;
+    use maplit::hashmap;
 
-    use crate::test_utils::{multipart_header, requestb};
+    use crate::test_utils::{multipart_header, name, requestb, values};
 
     use super::*;
 
@@ -150,6 +151,40 @@ mod tests {
                 body: Some(Cow::Borrowed("the body".as_bytes())),
                 ..Default::default()
             }
+        );
+    }
+
+    #[test]
+    fn empty_should_match_any() {
+        assert_eq!(
+            ContainsPart::new().matches(
+                &requestb(
+                    multipart_header(),
+                    indoc!{r#"
+                    --xyz
+                    Content-Disposition: form-data; name="part"
+
+                    content
+                    --xyz--
+                "#}.as_bytes().into()
+                ),
+            ),
+            true
+        );
+    }
+
+    #[test]
+    fn empty_should_not_match_request_without_parts() {
+        assert_eq!(
+            ContainsPart::new().matches(
+                &requestb(
+                    hashmap!{
+                        name("content-type") => values("text/plain"),
+                    },
+                    "not a multipart request".as_bytes().into(),
+                ),
+            ),
+            false
         );
     }
 
