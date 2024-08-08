@@ -55,15 +55,11 @@ mod test_utils {
     use std::collections::HashMap;
     use std::str::FromStr;
 
-    use wiremock::http::{HeaderMap, HeaderName, HeaderValue, Method, Url};
+    use wiremock::http::{HeaderName, HeaderValue, Method, Url};
     use wiremock::Request;
 
     pub fn name(name: &'static str) -> HeaderName {
         HeaderName::from_str(name).unwrap()
-    }
-
-    pub fn value(val: &'static str) -> HeaderValue {
-        HeaderValue::from_str(val).unwrap()
     }
 
     pub fn values(val: &'static str) -> HeaderValue {
