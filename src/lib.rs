@@ -34,14 +34,16 @@
 //! }
 //! ```
 
-#[cfg(test)] extern crate indoc;
-#[cfg(test)] extern crate maplit;
-extern crate wiremock;
+#[cfg(test)]
+extern crate indoc;
 extern crate lazy_regex;
+#[cfg(test)]
+extern crate maplit;
+extern crate wiremock;
 
-mod request_utils;
-mod part;
 pub mod matchers;
+mod part;
+mod request_utils;
 
 pub mod prelude {
     pub use crate::matchers::*;
@@ -49,11 +51,11 @@ pub mod prelude {
 
 #[cfg(test)]
 mod test_utils {
+    use maplit::hashmap;
     use std::collections::HashMap;
     use std::str::FromStr;
-    use maplit::hashmap;
 
-    use wiremock::http::{HeaderName, HeaderValue, HeaderValues, Method, Url};
+    use wiremock::http::{HeaderMap, HeaderName, HeaderValue, Method, Url};
     use wiremock::Request;
 
     pub fn name(name: &'static str) -> HeaderName {
@@ -64,32 +66,29 @@ mod test_utils {
         HeaderValue::from_str(val).unwrap()
     }
 
-    pub fn values(val: &'static str) -> HeaderValues {
-        value(val).into()
+    pub fn values(val: &'static str) -> HeaderValue {
+        HeaderValue::from_str(val).unwrap()
     }
 
-    pub fn request(
-        headers: HashMap<HeaderName, HeaderValues>,
-    ) -> Request {
+    pub fn request(headers: impl IntoIterator<Item = (HeaderName, HeaderValue)>) -> Request {
         requestb(headers, vec![])
     }
 
     pub fn requestb(
-        headers: HashMap<HeaderName, HeaderValues>,
+        headers: impl IntoIterator<Item = (HeaderName, HeaderValue)>,
         body: Vec<u8>,
     ) -> Request {
         Request {
             url: Url::from_str("http://localhost").unwrap(),
-            method: Method::Post,
-            headers,
+            method: Method::POST,
+            headers: headers.into_iter().collect(),
             body,
         }
     }
 
-    pub fn multipart_header() -> HashMap<HeaderName, HeaderValues> {
-        hashmap!{
+    pub fn multipart_header() -> HashMap<HeaderName, HeaderValue> {
+        hashmap! {
             name("content-type") => values("multipart/form-data; boundary=xyz"),
         }
     }
 }
-
