@@ -1,6 +1,6 @@
 [package]
 name = "wiremock-multipart"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["René Perschon <rene.perschon@akelius.de>"]
 description = "library of matchers for [wiremock](https://crates.io/crates/wiremock) dealing with multipart requests."
 homepage = "https://github.com/Leopard2A5/wiremock-multipart"
