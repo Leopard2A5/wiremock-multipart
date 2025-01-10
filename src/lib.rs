@@ -45,6 +45,9 @@ pub mod matchers;
 mod part;
 mod request_utils;
 
+pub use part::Part;
+pub use request_utils::{MultipartContentType, RequestUtils};
+
 pub mod prelude {
     pub use crate::matchers::*;
 }
